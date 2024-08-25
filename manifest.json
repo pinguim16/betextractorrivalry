@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Betting Data Extractor Rivalry",
+  "description": "A Chrome plugin for extracting betting data from Rivalry and exporting it to a CSV file.",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.rivalry.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "host_permissions": [
+    "https://*.rivalry.com/*"
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
