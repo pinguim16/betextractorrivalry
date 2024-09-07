@@ -11,7 +11,7 @@ chrome.runtime.onConnect.addListener((port) => {
                     const data = await extractBets(startDate);
                     if (data.length > 0) {
                         console.log('Dados extraídos com sucesso. Iniciando download do CSV.');
-                        downloadCSV(data, port);
+                        downloadCSV(data, port, startDate, endDate); // Passa o startDate e o endDate
                     } else {
                         console.log('Nenhuma aposta encontrada na data selecionada.');
                         port.postMessage({ success: false, message: 'Nenhuma aposta encontrada.' });
@@ -25,7 +25,7 @@ chrome.runtime.onConnect.addListener((port) => {
     }
 });
 
-function downloadCSV(data, port) {
+function downloadCSV(data, port, startDate, endDate) {
     if (downloaded) {
         console.log('Download já realizado. Pulando nova tentativa.');
         return; // Evita múltiplos downloads
@@ -39,7 +39,7 @@ function downloadCSV(data, port) {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = `bets_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `bet_rivalry_${startDate}_to_${endDate}.csv`; // Nome atualizado com startDate e endDate
     document.body.appendChild(link);
 
     console.log('Iniciando o download do CSV.');
@@ -51,12 +51,10 @@ function downloadCSV(data, port) {
     downloaded = true;
     console.log('Download do CSV concluído.');
 
-    // Envia a resposta de sucesso após o download
     if (port) {
         port.postMessage({ success: true, message: 'Download concluído.' });
     }
 
-    // Redefine a variável `downloaded` para `false` para permitir futuros downloads
     setTimeout(() => {
         downloaded = false;
         console.log('Variável downloaded redefinida para false.');
@@ -169,24 +167,25 @@ function parseBetData(betElement, betDate) {
     const formattedBetDate = formatDateForCSV(betDate);
 
     return [
-        formattedBetDate,
-        'S',
-        'eSport',
-        label,
-        odds,
-        stake,
-        state,
-        'Rivalry',
-        '',
-        category,
-        '',
-        '',
-        '',
-        comments,
-        '',
-        '',
-        '',
-        ''
+        formattedBetDate, // Data
+        'S', // Tipo
+        'eSport', // Esporte
+        label, // Label
+        odds, // Odds
+        stake, // Stake
+        state, // Estado (V/W)
+        'Rivalry', // Casa de aposta
+        '', // Tipster
+        category, // Categoria (ML/MS)
+        '', // Competição
+        '', // Tipo de aposta
+        '', // Fechamento
+        '', // Comissão
+        '', // Ao vivo
+        '', // Aposta grátis
+        '', // Cashout
+        '', // Each way
+        comments // Comentário
     ].join(';');
 }
 
