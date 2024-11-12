@@ -152,6 +152,18 @@ function parseBetData(betElement, betDate) {
         category = "ML";
     }
 
+    let competition = "";
+    // Verifica a classe para determinar a competição
+    if (betElement.querySelector('span[class*="csgo"]')) {
+        competition = "CS";
+    } else if (betElement.querySelector('span[class*="dota-2"]')) {
+        competition = "Dota";
+    } else if (betElement.querySelector('span[class*="league-of-legends"]')) {
+        competition = "LOL";
+    } else if (betElement.querySelector('span[class*="valorant"]')) {
+        competition = "Valorant";
+    }
+
     const valueAndOddsElement = betElement.querySelector('div.flex.items-center.justify-end > span.inline-block.ml-1.text-sm');
     let stake = '0.00';
     let odds = '0.00';
@@ -167,27 +179,28 @@ function parseBetData(betElement, betDate) {
     const formattedBetDate = formatDateForCSV(betDate);
 
     return [
-        formattedBetDate, // Data
-        'S', // Tipo
-        'eSport', // Esporte
-        label, // Label
-        odds, // Odds
-        stake, // Stake
-        state, // Estado (V/W)
-        'Rivalry', // Casa de aposta
-        '', // Tipster
-        category, // Categoria (ML/MS)
-        '', // Competição
-        '', // Tipo de aposta
-        '', // Fechamento
-        '', // Comissão
-        '', // Ao vivo
-        '', // Aposta grátis
-        '', // Cashout
-        '', // Each way
-        comments // Comentário
+        formattedBetDate,  // Data
+        'S',               // Tipo
+        'eSport',          // Esporte
+        label,             // Label
+        odds,              // Odds
+        stake,             // Stake
+        state,             // Estado (V/W)
+        'Rivalry',         // Casa de aposta
+        '',                // Tipster
+        category,          // Categoria (ML/MS)
+        competition,       // Competição (CS, Dota, LOL, Valorant)
+        '',                // Tipo de aposta
+        '',                // Fechamento
+        '',                // Comissão
+        '',                // Ao vivo
+        '',                // Aposta grátis
+        '',                // Cashout
+        '',                // Each way
+        comments           // Comentário
     ].join(';');
 }
+
 
 // Função para formatar a data para o CSV
 function formatDateForCSV(dateText) {
@@ -217,10 +230,16 @@ function parseDate(dateText) {
         'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
     };
 
+    if (!months[month]) {
+        console.error('Mês inválido:', month);
+        return null;
+    }
+
     const formattedDate = `${year}-${months[month]}-${day.padStart(2, '0')}`;
     console.log(`Data formatada: ${formattedDate}`);
     return formattedDate;
 }
+
 
 function subtractDays(dateString, days) {
     const date = new Date(dateString);
@@ -231,13 +250,18 @@ function subtractDays(dateString, days) {
 }
 
 async function navigateToNextPage() {
-    const nextButton = document.querySelector('button[aria-label="Next"]');
-    if (nextButton && !nextButton.disabled) {
-        nextButton.click();
-        console.log('Clique no botão "Next" realizado. Aguardando carregamento da página...');
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Aguarda 5 segundos para carregar a próxima página
-        return true;
+    try {
+        const nextButton = document.querySelector('button[aria-label="Next"]');
+        if (nextButton && !nextButton.disabled) {
+            nextButton.click();
+            console.log('Clique no botão "Next" realizado. Aguardando carregamento da página...');
+            await new Promise(resolve => setTimeout(resolve, 5000));  // Espera 5 segundos
+            return true;
+        }
+        console.log('Botão "Next" não encontrado ou está desabilitado.');
+        return false;
+    } catch (error) {
+        console.error('Erro ao tentar navegar para a próxima página:', error);
+        return false;
     }
-    console.log('Botão "Next" não encontrado ou está desabilitado.');
-    return false;
 }
